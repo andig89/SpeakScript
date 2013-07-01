@@ -1,0 +1,5 @@
+#!/bin/sh
+llvm-as-mp-3.3 lol.ll
+llc-mp-3.3 lol.bc
+clang lol.s
+./a.out
