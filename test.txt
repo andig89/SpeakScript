@@ -1,6 +1,6 @@
 ustaw b = 23
-drukuj(b)
 ustaw a
-a = 2
+wczytaj wartosc z klawiatury do zmiennej a
 drukuj(a)
+drukuj(b)
 zwroc 1

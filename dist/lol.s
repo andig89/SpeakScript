@@ -6,14 +6,17 @@ _main:                                  ## @main
 	pushq	%rbx
 	subq	$16, %rsp
 	movl	$23, 12(%rsp)
-	leaq	L_.format_str(%rip), %rbx
+	leaq	L_.format_str(%rip), %rdi
+	leaq	8(%rsp), %rsi
+	xorb	%al, %al
+	callq	_scanf
+	movl	8(%rsp), %esi
+	leaq	L_.format_str1(%rip), %rbx
 	movq	%rbx, %rdi
-	movl	$23, %esi
 	xorb	%al, %al
 	callq	_printf
-	movl	$2, 8(%rsp)
+	movl	12(%rsp), %esi
 	movq	%rbx, %rdi
-	movl	$2, %esi
 	xorb	%al, %al
 	callq	_printf
 	xorl	%eax, %eax
@@ -23,7 +26,10 @@ _main:                                  ## @main
 
 	.section	__TEXT,__cstring,cstring_literals
 L_.format_str:                          ## @.format_str
-	.asciz	 "%d\n"
+	.asciz	 "%i"
+
+L_.format_str1:                         ## @.format_str1
+	.asciz	 "%i \n"
 
 
 .subsections_via_symbols
