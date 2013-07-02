@@ -1,27 +1,79 @@
-// Generated from jfkgrammar.g4 by ANTLR 4.0
+// Generated from jfkgrammar.g4 by ANTLR 4.1
 
 package jfk;
 import jfk.Compiler;
 
-import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 
+/**
+ * This interface defines a complete listener for a parse tree produced by
+ * {@link jfkgrammarParser}.
+ */
 public interface jfkgrammarListener extends ParseTreeListener {
-	void enterExpression(jfkgrammarParser.ExpressionContext ctx);
-	void exitExpression(jfkgrammarParser.ExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpression(@NotNull jfkgrammarParser.ExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpression(@NotNull jfkgrammarParser.ExpressionContext ctx);
 
-	void enterStatement(jfkgrammarParser.StatementContext ctx);
-	void exitStatement(jfkgrammarParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatement(@NotNull jfkgrammarParser.StatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatement(@NotNull jfkgrammarParser.StatementContext ctx);
 
-	void enterInnaKlasa(jfkgrammarParser.InnaKlasaContext ctx);
-	void exitInnaKlasa(jfkgrammarParser.InnaKlasaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#innaKlasa}.
+	 * @param ctx the parse tree
+	 */
+	void enterInnaKlasa(@NotNull jfkgrammarParser.InnaKlasaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#innaKlasa}.
+	 * @param ctx the parse tree
+	 */
+	void exitInnaKlasa(@NotNull jfkgrammarParser.InnaKlasaContext ctx);
 
-	void enterProgram(jfkgrammarParser.ProgramContext ctx);
-	void exitProgram(jfkgrammarParser.ProgramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#program}.
+	 * @param ctx the parse tree
+	 */
+	void enterProgram(@NotNull jfkgrammarParser.ProgramContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#program}.
+	 * @param ctx the parse tree
+	 */
+	void exitProgram(@NotNull jfkgrammarParser.ProgramContext ctx);
 
-	void enterInvocation(jfkgrammarParser.InvocationContext ctx);
-	void exitInvocation(jfkgrammarParser.InvocationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#invocation}.
+	 * @param ctx the parse tree
+	 */
+	void enterInvocation(@NotNull jfkgrammarParser.InvocationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#invocation}.
+	 * @param ctx the parse tree
+	 */
+	void exitInvocation(@NotNull jfkgrammarParser.InvocationContext ctx);
 
-	void enterImports(jfkgrammarParser.ImportsContext ctx);
-	void exitImports(jfkgrammarParser.ImportsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#imports}.
+	 * @param ctx the parse tree
+	 */
+	void enterImports(@NotNull jfkgrammarParser.ImportsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#imports}.
+	 * @param ctx the parse tree
+	 */
+	void exitImports(@NotNull jfkgrammarParser.ImportsContext ctx);
 }

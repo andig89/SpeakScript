@@ -18,7 +18,8 @@ public class FunctionBlock {
     }
 
     public void emit(String str) {
-        builder.append(str + "\n");
+        //System.out.println(builder.toString());
+        builder.append(str).append("\n");
     }
     
     public void emitStr(String str) {

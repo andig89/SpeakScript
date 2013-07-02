@@ -22,7 +22,13 @@ innaKlasa returns [Compiler.Statement ret] :
     ;
 
 statement returns [Compiler.Statement ret] :
-    'ustaw' a = ID { $ret = new Compiler.VariableDeclaration($a.text); }  ('=' e = expression { $ret = new Compiler.Assignment($a.text, $e.ret); })* |
+    'ustaw' a = ID { $ret = new Compiler.VariableDeclaration($a.text);} ('=' e = expression {
+        //objekt, który przechowuje parametry: nazwa funkcji, która ma być wywołana, oraz jej prametry
+        ArrayList<Object[]> list = new ArrayList<Object[]>();
+        list.add(new Object[]{new String("VariableDeclaration"), new String($a.text)});
+        list.add(new Object[]{new String("Assignment"), new String($a.text), $e.ret}); 
+        $ret = new Compiler.CallClass(list);
+    })?  |
     a = ID '=' e = expression { $ret = new Compiler.Assignment($a.text, $e.ret); } |
     'zwroc' e = expression { $ret = new Compiler.Return($e.ret); } |
     invocation { $ret = $invocation.ret; }

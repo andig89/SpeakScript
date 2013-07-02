@@ -9,22 +9,28 @@ import java.util.List;
 
 public class Compiler {
 
-    public static class Program {
+    public static List<Statement> stmts = new ArrayList<Statement>();
 
-        private List<Statement> stmts = new ArrayList<Statement>();
-//        private List<ImportFile> imports = new ArrayList<ImportFile>();
+    public static class Program {
 
         public Program() {
         }
 
         public void add(Statement stmt) {
-            stmts.add(stmt);
+            if (stmt.getClass().equals(Compiler.CallClass.class)) { //jeśli nasz Statement, to funkcja, której celem
+                //jest wywolanie innej, w tedy wywołujemy jej block emit
+                FunctionBlock block = new FunctionBlock();
+                stmt.emit(block);
+            } else {
+                stmts.add(stmt);
+            }
         }
+
+        ;
 
 //        public void add(ImportFile stmt) {
 //            imports.add(stmt);
 //        }
-
         public String emit() {
             FunctionBlock block = new FunctionBlock();
             block.emit("@.format_str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1");
@@ -42,6 +48,33 @@ public class Compiler {
     public static abstract class Statement {
 
         public abstract void emit(FunctionBlock block);
+    }
+
+    public static class CallClass extends Statement {
+
+        private final ArrayList list;
+
+        public CallClass(ArrayList list) {
+            this.list = list;
+        };
+
+        @Override
+        public void emit(FunctionBlock block) {
+            //rozpoznajemy, która funkcja ma być dodana do listy Statementów i je dodajemy
+            Object[] objectElements;
+            for (int i = 0; i < list.size(); i++) {
+                objectElements = (Object[]) list.get(i);
+                switch ((String) objectElements[0]) {
+                    case "Assignment":
+                        stmts.add(new Compiler.Assignment((String) objectElements[1], (Expression) objectElements[2]));
+                        break;
+                    case "VariableDeclaration":
+                        stmts.add(new Compiler.VariableDeclaration((String) objectElements[1]));
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     public static class Return extends Statement {
@@ -62,7 +95,6 @@ public class Compiler {
 //
 //        public abstract void emit(FunctionBlock block);
 //    }
-
     public static class ImportFile extends Statement {
 
         private final Expression expr;
@@ -78,7 +110,7 @@ public class Compiler {
             block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
         }
     }
-    
+
     public static class innaKlasaPoczatek extends Statement {
 
         private final Expression expr;
@@ -94,8 +126,8 @@ public class Compiler {
             block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
         }
     }
-    
-     public static class innaKlasaKoniec extends Statement {
+
+    public static class innaKlasaKoniec extends Statement {
 
         private final Expression expr;
 
@@ -110,7 +142,7 @@ public class Compiler {
             block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
         }
     }
-    
+
     public static class VariableDeclaration extends Statement {
 
         private final String name;
