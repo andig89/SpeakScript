@@ -6,6 +6,7 @@ _main:                                  ## @main
 	pushq	%rbx
 	subq	$16, %rsp
 	movl	$25, 12(%rsp)
+	movl	$24, 4(%rsp)
 	leaq	L_.format_str(%rip), %rdi
 	leaq	8(%rsp), %rsi
 	xorb	%al, %al
@@ -16,6 +17,10 @@ _main:                                  ## @main
 	xorb	%al, %al
 	callq	_printf
 	movl	12(%rsp), %esi
+	movq	%rbx, %rdi
+	xorb	%al, %al
+	callq	_printf
+	movl	4(%rsp), %esi
 	movq	%rbx, %rdi
 	xorb	%al, %al
 	callq	_printf

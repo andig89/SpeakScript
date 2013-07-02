@@ -51,8 +51,8 @@ invocation returns [Compiler.Invocation ret] :
     ;
 
 atom returns[int value]:
-    INT {$value = Integer.parseInt($INT.text);} 
-                       ;
+    INT {$value = Integer.parseInt($INT.text);} |
+    '('addExpr')' {$value = $addExpr.value;};
 
 multExpr returns[int value]:
     a=atom {$value = $a.value;} (

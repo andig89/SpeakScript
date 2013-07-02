@@ -1,6 +1,8 @@
-ustaw b = 23 + 2
+ustaw b = 24 / ( 3 - 2 ) + 1
 ustaw a
+ustaw c = 21 + ( 4 * (2-1) ) / 2 + 1 
 wczytaj wartosc z klawiatury do zmiennej a
 drukuj(a)
 drukuj(b)
+drukuj(c)
 zwroc 1

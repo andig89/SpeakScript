@@ -4,11 +4,15 @@ define i32 @main() nounwind {
 %b = alloca i32, align 4
 store i32 25, i32* %b, align 4
 %a = alloca i32, align 4
+%c = alloca i32, align 4
+store i32 24, i32* %c, align 4
 %1 = call i32 (i8*, ...)* @scanf(i8* getelementptr inbounds ([3x i8]* @.format_str, i32 0, i32 0), i32* %a)
 %2 = load i32* %a, align 4
 %3 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.format_str1, i32 0, i32 0), i32 %2)
 %4 = load i32* %b, align 4
 %5 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.format_str1, i32 0, i32 0), i32 %4)
+%6 = load i32* %c, align 4
+%7 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.format_str1, i32 0, i32 0), i32 %6)
 ret i32 0
 }
 declare i32 @printf(i8*, ...)
