@@ -30,6 +30,7 @@ statement returns [Compiler.Statement ret] :
         $ret = new Compiler.CallClass(list);
     })?  |
     a = ID '=' e = expression { $ret = new Compiler.Assignment($a.text, $e.ret); } |
+    'wczytaj wartosc z klawiatury do zmiennej' a = ID {$ret = new Compiler.Scanf($a.text);} |
     'zwroc' e = expression { $ret = new Compiler.Return($e.ret); } |
     invocation { $ret = $invocation.ret; }
     ;

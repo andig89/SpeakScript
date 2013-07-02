@@ -10,6 +10,7 @@ import java.util.List;
 public class Compiler {
 
     public static List<Statement> stmts = new ArrayList<Statement>();
+    public static ArrayList<String> variableList = new ArrayList<String>();
 
     public static class Program {
 
@@ -33,14 +34,13 @@ public class Compiler {
 //        }
         public String emit() {
             FunctionBlock block = new FunctionBlock();
-            block.emit("@.format_str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1");
-            block.emit("declare i32 @printf(i8*, ...) nounwind");
-
             block.emit("define i32 @main() nounwind {");
             for (Statement stmt : stmts) {
                 stmt.emit(block);
             }
             block.emit("}");
+            block.emitEnd("declare i32 @printf(i8*, ...)");
+            block.emitEnd("declare i32 @scanf(i8*, ...)");
             return block.getString();
         }
     }
@@ -56,7 +56,9 @@ public class Compiler {
 
         public CallClass(ArrayList list) {
             this.list = list;
-        };
+        }
+
+        ;
 
         @Override
         public void emit(FunctionBlock block) {
@@ -91,6 +93,25 @@ public class Compiler {
         }
     }
 
+    public static class Scanf extends Statement {
+
+        private final String name;
+
+        public Scanf(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void emit(FunctionBlock block) {
+            int reg = block.nextRegister();
+            if (!variableList.contains("format_str1")) {
+                block.emitStr("@.format_str1 = private unnamed_addr constant [5 x i8] c\"%i \\0A\\00\", align 1");
+                variableList.add("format_str1");
+            };
+            block.emit("%" + reg + " = call i32 (i8*, ...)* @scanf(i8* getelementptr inbounds ([3x i8]* @.format_str, i32 0, i32 0), i32* %" + name + ")");
+        }
+    }
+
     //    public static abstract class ImportFile {
 //
 //        public abstract void emit(FunctionBlock block);
@@ -107,7 +128,7 @@ public class Compiler {
         public void emit(FunctionBlock block) {
             int reg = block.nextRegister();
             block.emitStr("@.str = private unnamed_addr constant [7 x i8] c\"import\\00\", align 1");
-            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
+            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.format_str, i32 0, i32 0))");//funkcje, metody
         }
     }
 
@@ -123,7 +144,7 @@ public class Compiler {
         public void emit(FunctionBlock block) {
             int reg = block.nextRegister();
             block.emitStr("@.str = private unnamed_addr constant [7 x i8] c\"poczatek\\00\", align 1");
-            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
+            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.format_str, i32 0, i32 0))");//funkcje, metody
         }
     }
 
@@ -139,7 +160,7 @@ public class Compiler {
         public void emit(FunctionBlock block) {
             int reg = block.nextRegister();
             block.emitStr("@.str = private unnamed_addr constant [7 x i8] c\"koniec\\00\", align 1");
-            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([7x i8]* @.str, i32 0, i32 0))");//funkcje, metody
+            block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([3 x i8]* @.format_str, i32 0, i32 0))");//funkcje, metody
         }
     }
 
@@ -194,7 +215,11 @@ public class Compiler {
             for (Expression exp : params) {
                 int res = exp.emit(block);
                 int reg = block.nextRegister();
-                block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.format_str, i32 0, i32 0), i32 %" + res + ") nounwind");
+                if (!variableList.contains("format_str")) {
+                    block.emitStr("@.format_str = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1");
+                    variableList.add("format_str");
+                };
+                block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.format_str1, i32 0, i32 0), i32 %" + res + ")");
             }
         }
     }
@@ -231,7 +256,7 @@ public class Compiler {
         @Override
         public int emit(FunctionBlock block) {
             int reg = block.nextRegister();
-            block.emit("%" + reg + " = load i32* %" + name);
+            block.emit("%" + reg + " = load i32* %" + name + ", align 4");
             return reg;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }

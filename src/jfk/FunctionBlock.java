@@ -22,6 +22,10 @@ public class FunctionBlock {
         builder.append(str).append("\n");
     }
     
+     public void emitEnd(String str) {
+        builder.insert(builder.length(),str + "\n");
+    }
+    
     public void emitStr(String str) {
         builder.insert(0,str + "\n");
     }
