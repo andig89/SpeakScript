@@ -72,6 +72,10 @@ public class Compiler {
                         break;
                     case "VariableDeclaration":
                         stmts.add(new Compiler.VariableDeclaration((String) objectElements[1]));
+                        break;
+                    case "AssignmentVariable":
+                        stmts.add(new Compiler.AssignmentVariable((String) objectElements[1], (Integer) objectElements[2]));
+                        break;
                     default:
                         break;
                 }
@@ -105,7 +109,7 @@ public class Compiler {
         public void emit(FunctionBlock block) {
             int reg = block.nextRegister();
             if (!variableList.contains("format_str1")) {
-                block.emitStr("@.format_str1 = private unnamed_addr constant [5 x i8] c\"%i \\0A\\00\", align 1");
+                block.emitStr("@.format_str = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1");
                 variableList.add("format_str1");
             };
             block.emit("%" + reg + " = call i32 (i8*, ...)* @scanf(i8* getelementptr inbounds ([3x i8]* @.format_str, i32 0, i32 0), i32* %" + name + ")");
@@ -196,6 +200,23 @@ public class Compiler {
         }
     }
 
+    public static class AssignmentVariable extends Statement {
+
+        private final String where;
+        private final int value;
+
+        public AssignmentVariable(String where, int value) {
+            this.where = where;
+            this.value = value;
+        }
+
+        @Override
+        public void emit(FunctionBlock block) {
+            //System.out.println(((IntExpression)expr).val );
+            block.emit("store i32 " + value + ", i32* %" + where + ", align 4");
+        }
+    }
+
     public static class Invocation extends Statement {
 
         private final String name;
@@ -216,7 +237,7 @@ public class Compiler {
                 int res = exp.emit(block);
                 int reg = block.nextRegister();
                 if (!variableList.contains("format_str")) {
-                    block.emitStr("@.format_str = private unnamed_addr constant [3 x i8] c\"%i\\00\", align 1");
+                    block.emitStr("@.format_str1 = private unnamed_addr constant [5 x i8] c\"%i \\0A\\00\", align 1");
                     variableList.add("format_str");
                 };
                 block.emit("%" + reg + " = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.format_str1, i32 0, i32 0), i32 %" + res + ")");

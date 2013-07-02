@@ -23,6 +23,17 @@ public interface jfkgrammarListener extends ParseTreeListener {
 	void exitExpression(@NotNull jfkgrammarParser.ExpressionContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#multExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMultExpr(@NotNull jfkgrammarParser.MultExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#multExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMultExpr(@NotNull jfkgrammarParser.MultExprContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link jfkgrammarParser#statement}.
 	 * @param ctx the parse tree
 	 */
@@ -32,6 +43,17 @@ public interface jfkgrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement(@NotNull jfkgrammarParser.StatementContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#atom}.
+	 * @param ctx the parse tree
+	 */
+	void enterAtom(@NotNull jfkgrammarParser.AtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#atom}.
+	 * @param ctx the parse tree
+	 */
+	void exitAtom(@NotNull jfkgrammarParser.AtomContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link jfkgrammarParser#innaKlasa}.
@@ -54,6 +76,17 @@ public interface jfkgrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitProgram(@NotNull jfkgrammarParser.ProgramContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#addExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAddExpr(@NotNull jfkgrammarParser.AddExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#addExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAddExpr(@NotNull jfkgrammarParser.AddExprContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link jfkgrammarParser#invocation}.

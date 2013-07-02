@@ -28,7 +28,13 @@ statement returns [Compiler.Statement ret] :
         list.add(new Object[]{new String("VariableDeclaration"), new String($a.text)});
         list.add(new Object[]{new String("Assignment"), new String($a.text), $e.ret}); 
         $ret = new Compiler.CallClass(list);
-    })?  |
+    } | '=' ar = addExpr {
+        //objekt, który przechowuje parametry: nazwa funkcji, która ma być wywołana, oraz jej prametry
+        ArrayList<Object[]> list = new ArrayList<Object[]>();
+        list.add(new Object[]{new String("VariableDeclaration"), new String($a.text)});
+        list.add(new Object[]{new String("AssignmentVariable"), new String($a.text), new Integer($addExpr.value)}); 
+        $ret = new Compiler.CallClass(list);
+    })? |
     a = ID '=' e = expression { $ret = new Compiler.Assignment($a.text, $e.ret); } |
     'wczytaj wartosc z klawiatury do zmiennej' a = ID {$ret = new Compiler.Scanf($a.text);} |
     'zwroc' e = expression { $ret = new Compiler.Return($e.ret); } |
@@ -43,6 +49,21 @@ invocation returns [Compiler.Invocation ret] :
         )?
     ')'
     ;
+
+atom returns[int value]:
+    INT {$value = Integer.parseInt($INT.text);} 
+                       ;
+
+multExpr returns[int value]:
+    a=atom {$value = $a.value;} (
+        '*' b=atom {$value*=$b.value;} |
+        '/' b=atom{$value/=$b.value;}
+    )*;
+addExpr returns[int value]:
+    a=multExpr {$value = $a.value;} (
+        '+' b=multExpr {$value+=$b.value;} |
+        '-' b=multExpr{$value-=$b.value;}
+)* ;
 
 expression returns [Compiler.Expression ret] :
     INT { $ret = new Compiler.IntExpression($INT.text); } |
