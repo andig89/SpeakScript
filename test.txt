@@ -1,4 +1,4 @@
-ustaw b = 23
+ustaw b = 23 + 2
 ustaw a
 wczytaj wartosc z klawiatury do zmiennej a
 drukuj(a)

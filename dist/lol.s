@@ -5,7 +5,7 @@ _main:                                  ## @main
 ## BB#0:
 	pushq	%rbx
 	subq	$16, %rsp
-	movl	$23, 12(%rsp)
+	movl	$25, 12(%rsp)
 	leaq	L_.format_str(%rip), %rdi
 	leaq	8(%rsp), %rsi
 	xorb	%al, %al
@@ -25,11 +25,11 @@ _main:                                  ## @main
 	ret
 
 	.section	__TEXT,__cstring,cstring_literals
-L_.format_str:                          ## @.format_str
-	.asciz	 "%i"
-
 L_.format_str1:                         ## @.format_str1
 	.asciz	 "%i \n"
+
+L_.format_str:                          ## @.format_str
+	.asciz	 "%i"
 
 
 .subsections_via_symbols
