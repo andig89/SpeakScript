@@ -1,8 +1,14 @@
-ustaw b = 24 / ( 3 - 2 ) + 1
-ustaw a
-ustaw c = 21 + ( 4 * (2-1) ) / 2 + 1 
+ustaw b = 24 / (( 3 - 2 ) + 1) //12
+ustaw a = 2
+ustaw a = 1
+ustaw c = 21 + ( 4 * (2-1) ) / 1 + 1 //26
+ustaw d = 2 + 1 //3
+ustaw d = 3.1 + 1 //4.1
 wczytaj wartosc z klawiatury do zmiennej a
+wczytaj wartosc z klawiatury do zmiennej d
 drukuj(a)
 drukuj(b)
 drukuj(c)
+wczytaj wartosc z klawiatury do zmiennej d
+drukuj(d)
 zwroc 1
