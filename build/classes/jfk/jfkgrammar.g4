@@ -6,37 +6,92 @@ import jfk.Compiler;
 }
 @members {    
     enum typeValue {
-        NUMBER, LITERA
+        NUMER, LITERA
+    };
+	enum typeReturn {
+        TEXT, ANOTHER
+    };
+	enum typeIf {
+        MNIEJSZE, WIEKSZE, MNIEJSZE_ROWNE,WIEKSZE_ROWNE, ROWNE, NIE_ROWNE
     };}
+
 
 program returns [Compiler.Program ret] :
     { $ret = new Compiler.Program(); }
-    (s = statement { $ret.add($s.ret); }    |
-     i = imports {$ret.add($i.ret);}  |
-     k = innaKlasa {$ret.add($k.ret);}
+	(k = innaKlasa {$ret.add($k.ret);})*
+    (s = statement { $ret.add($s.ret); } |
+     i = imports {$ret.add($i.ret);}
     )*
     ;
 
-imports returns [Compiler.Statement ret] :
-    'importuj plik' e = expression { $ret = new Compiler.ImportFile($e.ret); }
+imports returns [ArrayList<Compiler.Statement> ret = new ArrayList<Compiler.Statement>()] :        
+    'importuj plik' e = expression { $ret.add(new Compiler.ImportFile($e.ret)); }
     ;
+funkcjaJezeli returns [ArrayList<Compiler.Statement> ret = new ArrayList<Compiler.Statement>()] :   
+	'jezeli' w = warunek 'to' s1 = statements 'koniec jezeli'{
+		$ret.add(new Compiler.FunkcjaJezeli($w.ret,$s1.ret));
+	}|
+	'jezeli' w = warunek 'to' s1 = statements 'w przecwinym wypadku' s2 = statements 'koniec jezeli'{
+		$ret.add(new Compiler.FunkcjaJezeli($w.ret,$s1.ret, $s2.ret));
+	}
+;
 
-innaKlasa returns [Compiler.Statement ret] :
-    'poczatek klasy' e = expression { $ret = new Compiler.innaKlasaPoczatek($e.ret); } (statement)+ 'koniec klasy' e = expression { $ret = new Compiler.innaKlasaKoniec($e.ret); }
+warunek returns[Object[] ret=new Object[]{}]:
+	e1 = expression '<' e2 = expression {$ret = new Object[]{$e1.text,typeIf.MNIEJSZE};}|
+	e1 = expression '>' e2 = expression {$ret = new Object[]{$e1.text,typeIf.WIEKSZE};}|
+	e1 = expression '<=' e2 = expression {$ret = new Object[]{$e1.text,typeIf.MNIEJSZE_ROWNE};}|
+	e1 = expression '=<' e2 = expression {$ret = new Object[]{$e1.text,typeIf.MNIEJSZE_ROWNE};}|
+	e1 = expression '>=' e2 = expression {$ret = new Object[]{$e1.text,typeIf.WIEKSZE_ROWNE};}|
+	e1 = expression '=>' e2 = expression {$ret = new Object[]{$e1.text,typeIf.WIEKSZE_ROWNE};}|
+	e1 = expression '=' e2 = expression {$ret = new Object[]{$e1.text,typeIf.ROWNE};}|
+	e1 = expression '!=' e2 = expression {$ret = new Object[]{$e1.text,typeIf.NIE_ROWNE};}|
+	e1 = expression '=!' e2 = expression {$ret = new Object[]{$e1.text,typeIf.NIE_ROWNE};}
+;
+innaKlasa returns [ArrayList<Compiler.Statement> ret = new ArrayList<Compiler.Statement>()] :
+    'poczatek funkcji' e = expression s = statements (rt = returnFunction)? 'koniec funkcji' k = expression {
+        $ret.add(new Compiler.InnaFunkcjaPoczatek($e.text, $k.text));
+		for (int i = 0; i < $s.ret.size(); i++){
+			ArrayList<Compiler.Statement> statement = $s.ret.get(i);
+			for (int j = 0; j < statement.size(); j++){
+				$ret.add(statement.get(j));
+			}
+		}
+        $ret.add(new Compiler.Return($rt.ret));
+        $ret.add(new Compiler.InnaFunkcjaKoniec($e.text, $rt.ret));
+    }
     ;
+returnFunction returns[Object[] ret=new Object[]{}]:
+	'zwroc' z = expression {$ret=new Object[]{$z.text,typeReturn.ANOTHER};} |
+	'zwroc "' z = expression '"' {$ret=new Object[]{$z.text,typeReturn.TEXT};}
+;
+	
+statements returns [ArrayList<ArrayList<Compiler.Statement>> ret = new ArrayList<ArrayList<Compiler.Statement>>()] :
+	(s = statement{
+                $ret.add($s.ret);
+        })+;
 
-statement returns [Compiler.Statement ret] :
-    'ustaw' a = ID { $ret = new Compiler.VariableDeclaration($a.text,new Object[]{"0",typeValue.NUMBER});} ('=' ar = addExpr {
-        //objekt, który przechowuje parametry: nazwa funkcji, która ma być wywołana, oraz jej prametry
-        ArrayList<Object[]> list = new ArrayList<Object[]>();
-        list.add(new Object[]{new String("VariableDeclaration"), new String($a.text), new Object[]{$addExpr.value,typeValue.NUMBER}});
-        list.add(new Object[]{new String("AssignmentVariable"), new String($a.text), new Object[]{$addExpr.value,typeValue.NUMBER}});
-
-        $ret = new Compiler.CallClass(list);
-    })* |
-    'wczytaj wartosc z klawiatury do zmiennej' a = ID {$ret = new Compiler.Scanf($a.text);} |
-    'zwroc' e = expression { $ret = new Compiler.Return($e.ret); } |
-invocation { $ret = $invocation.ret; }
+statement returns [ArrayList<Compiler.Statement> ret = new ArrayList<Compiler.Statement>()] :
+    'deklaruj'
+        a = ID {
+            $ret.add(new Compiler.VariableDeclaration($a.text,new Object[]{0.0,typeValue.NUMER}));
+        } (',' a = ID {
+            $ret.add(new Compiler.VariableDeclaration($a.text,new Object[]{0.0,typeValue.NUMER}));
+        })*
+        ('=' ar = addExpr {
+            $ret.add(new Compiler.AssignmentVariable($a.text,new Object[]{$ar.value,typeValue.NUMER}));
+        })? (
+            (',' a = ID {
+                $ret.add(new Compiler.VariableDeclaration($a.text,new Object[]{0.0,typeValue.NUMER}));
+            })+ ('=' ar = addExpr {
+                $ret.add(new Compiler.AssignmentVariable($a.text,new Object[]{$ar.value,typeValue.NUMER}));
+            })?
+        )* |
+    a = ID ('=' ar = addExpr {
+        $ret.add(new Compiler.AssignmentVariable($a.text,new Object[]{$ar.value,typeValue.NUMER}));
+    })? |
+	(a = ID '=')? 'wywolaj funkcje' e = expression {$ret.add(new Compiler.CallFunction($a.text, $e.text));} |
+    'wczytaj wartosc z klawiatury do zmiennej' a = ID {$ret.add(new Compiler.Scanf($a.text));} |
+    invocation { $ret.add($invocation.ret); }
     ;
 
 invocation returns [Compiler.Invocation ret] :

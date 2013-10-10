@@ -1,6 +1,0 @@
-importuj plik aa
-ustaw b = 1
-drukuj(b)
-poczatek klasy lol
-koniec klasy lol
-zwroc 1

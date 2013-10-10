@@ -78,6 +78,28 @@ public interface jfkgrammarListener extends ParseTreeListener {
 	void exitProgram(@NotNull jfkgrammarParser.ProgramContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#statements}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatements(@NotNull jfkgrammarParser.StatementsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#statements}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatements(@NotNull jfkgrammarParser.StatementsContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link jfkgrammarParser#returnFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnFunction(@NotNull jfkgrammarParser.ReturnFunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link jfkgrammarParser#returnFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnFunction(@NotNull jfkgrammarParser.ReturnFunctionContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link jfkgrammarParser#addExpr}.
 	 * @param ctx the parse tree
 	 */

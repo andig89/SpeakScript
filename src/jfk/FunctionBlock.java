@@ -13,6 +13,7 @@ public class FunctionBlock {
     private class ObjectOfBuildersInFunction {
 
         StringBuilder builderMain = new StringBuilder();
+        StringBuilder builderDefine = new StringBuilder();
         StringBuilder builderAllocaString = new StringBuilder();
         StringBuilder builderAllocaAnother = new StringBuilder();
 
@@ -20,6 +21,7 @@ public class FunctionBlock {
         }
 
         public ObjectOfBuildersInFunction(StringBuilder builderMain, StringBuilder builderAlloca) {
+            this.builderDefine = builderDefine;
             this.builderMain = builderMain;
             this.builderAllocaString = builderAlloca;
             this.builderAllocaAnother = builderAlloca;
@@ -28,13 +30,13 @@ public class FunctionBlock {
 
     private class ObjectsOfAllocaValue {
 
-        typesOfDeclarationValues actualTypeOfDeclarationValue;
-        ArrayList<typesOfDeclarationValues> allocaTypesOfValue = new ArrayList<typesOfDeclarationValues>();
+        declarationValuesTypes actualTypeOfDeclarationValue;
+        ArrayList<declarationValuesTypes> allocaTypesOfValue = new ArrayList<declarationValuesTypes>();
 
         public ObjectsOfAllocaValue() {
         }
 
-        public ObjectsOfAllocaValue(typesOfDeclarationValues actualTypeOfDeclarationValue) {
+        public ObjectsOfAllocaValue(declarationValuesTypes actualTypeOfDeclarationValue) {
             this.actualTypeOfDeclarationValue = actualTypeOfDeclarationValue;
             allocaTypesOfValue.add(actualTypeOfDeclarationValue);
         }
@@ -44,6 +46,7 @@ public class FunctionBlock {
 
         ObjectOfBuildersInFunction objectOfBuildersInFunction = new ObjectOfBuildersInFunction();
         HashMap<String, ObjectsOfAllocaValue> hashMapFunctionValues = new HashMap<String, ObjectsOfAllocaValue>();
+        functionTypes functionType;
 
         public ObjectsOfFunction() {
         }
@@ -67,56 +70,125 @@ public class FunctionBlock {
     private ObjectsOfAllocaValue objectOfAllocaValue;
     private HashMap<String, String> hashMapDefinition = new HashMap<String, String>();
     private ArrayList<String> declaresArrayList = new ArrayList<String>();
-    private int registerId = 1;
+    private ArrayList<Object[]> registerId = new ArrayList<Object[]>();
     String nameOfAllocaValue;
 
-    /**
-     * Enum zaiwerający obsługiwane typy deklaracji.
-     *
-     * @param ALLOCA alokacja zmiennej w pamięci.
-     * @param METHODS funkcja zapisana w LLVM.
-     * @param DECLARE deklaracja zapisana w LLVM.
-     */
-    enum typeDeclareOrDefiniton {
+    enum functionTypes {
 
-        DECLARE, DEFINITION;
-    };
-
-    enum typesOfDeclarationValues {
-
-        INT, DOUBLE, STRING, UNKNOWN
-    };
+        INT, DOUBLE, STRING, VOID
+    }
 
     /**
-     * Enum zaiwerający obsługiwane typy deklaracji.
+     * Enum zaiwerający symbole odnoszące się do dwóch części kodu LLVM.
      *
-     * @param EMIT oznacza odwołanie do * * * * * * * * * *
-     * {@link StringBuilder} <code>builder</code>, który zawiera polecania LLVM
-     * dotycząc programu main LLVM
-     * @param EMITSTART oznacza odwołanie do * * * * * * * *
-     * {@link StringBuilder} <code>builderStart</code>, w którym zdefiniowane są
-     * zmienne cofinguracyjne LLVM.
-     * @param EMITEND oznacza odwołanie do * * * * * * * * *
-     * {@link StringBuilder} <code>builderEnd</code>, który zawiera polecania
-     * LLVM dotycząc klas i metod.
+     * @param DECLARE - jest symbolem odnoszącym się do deklaracji funkcji (np. <code>declare i32
+     * @scanf(i8*, ...)</code>) znajdujących się w zmiennej
+     * {@link  jfk.FunctionBlock#builderDeclare}, użytych w programie LLVM.
+     * @param DEFINITION - jest symbolem odnoszącym się do definicji * * * * * *
+     * * * * * *
+     * (np. <code>@.scanf_string = private unnamed_addr constant [3 x i8] c"%s\00", align 1</code>)
+     * znajdujących się w zmiennej {@link  jfk.FunctionBlock#builderDefinition},
+     * użytych w programie LLVM.
      */
-    enum typesOfEmitDeclareOrDefinition {
+    enum declareOrDefinitonType {
 
-        EMITDEFINITON, EMITDECLARE
+        /**
+         * @param DECLARE - jest symbolem odnoszącym się do deklaracji funkcji
+         * (np. <code>declare i32
+         * @scanf(i8*, ...)</code>) znajdujących się w zmiennej
+         * {@link  jfk.FunctionBlock#builderDeclare}, użytych w programie LLVM.
+         */
+        DECLARE,
+        /**
+         * @param DEFINITION - jest symbolem odnoszącym się do definicji * * * *
+         * * * * * * * *
+         * (np. <code>@.scanf_string = private unnamed_addr constant [3 x i8] c"%s\00", align 1</code>)
+         * znajdujących się w zmiennej
+         * {@link  jfk.FunctionBlock#builderDefinition}, użytych w programie
+         * LLVM.
+         */
+        DEFINITION;
     };
 
-    enum typesOfEmitClassAndFunction {
+    /**
+     * Enum zaiwerający obsługiwane typy deklaracji zmiennych w języku
+     * SpeakScript.
+     *
+     * @param INT typ typu {@link Integer},
+     * @param DOUBLE typ typu {@link Double},
+     * @param STRING typ typu {@link String},
+     * @param UNKNOWN typ nieznany, użyty w przypadku użycia funkcji
+     * {@link jfk.Compiler.Scanf}.
+     */
+    enum declarationValuesTypes {
 
-        FUNCTIONSOFCLASS, ADDNEWALLOCA, CLASS
+        /**
+         * @param INT typ typu {@link Integer},
+         */
+        INT,
+        /**
+         * @param DOUBLE typ typu {@link Double},
+         */
+        DOUBLE,
+        /**
+         * @param STRING typ typu {@link String},
+         */
+        STRING,
+        /**
+         * @param UNKNOWN typ nieznany, użyty w przypadku użycia funkcji
+         * {@link jfk.Compiler.Scanf}.
+         */
+        UNKNOWN
     };
 
-    enum typesOfCheckTypeOfDeclaration {
+    /**
+     * Enum zaiwerający symbole oznaczające sposób i miejsce dodania kodu LLVM
+     * oraz informacji o tym fragmęcie kodu do konkretnych zmiennych poprzez
+     * funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes).
+     *
+     * @param FUNCTIONSOFCLASS symbol onaczający dodania kodu LLVM danej funkcji danej klasy programu LLVM oraz informacji o tym fragmęcie kodu do konkretnych zmiennych poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes);
+     * @param ADDNEWALLOCA symbol onaczający dodania kodu LLVM alokacji
+     * zmiennych danej funckji danej klasy programu LLVM oraz informacji o tym
+     * fragmęcie kodu do konkretnych zmiennych poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes);
+     * @param CLASS symbol onaczający dodania kodu LLVM danej klasy programu
+     * LLVM oraz informacji o tym fragmęcie kodu do konkretnych zmiennych
+     * poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes).
+     */
+    enum emitTypes {
 
-        ACTUAL, ALL
+        /**
+         * @param FUNCTIONSOFCLASS symbol onaczający dodania kodu LLVM danej
+         * funkcji danej klasy programu LLVM oraz informacji o tym fragmęcie
+         * kodu do konkretnych zmiennych poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes);
+         */
+        FUNCTIONSOFCLASS,
+        /**
+         * @param ADDNEWALLOCA symbol onaczający dodania kodu LLVM alokacji
+         * zmiennych danej funckji danej klasy programu LLVM oraz informacji o
+         * tym fragmęcie kodu do konkretnych zmiennych poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes);
+         */
+        FUNCTIONSOFCLASSDEFINE,
+        ADDNEWALLOCA,
+        /**
+         * @param CLASS symbol onaczający dodania kodu LLVM danej klasy programu
+         * LLVM oraz informacji o tym fragmęcie kodu do konkretnych zmiennych
+         * poprzez funkcję {@link  jfk.FunctionBlock#emit(java.lang.String, java.lang.String, jfk.FunctionBlock.emitTypes).
+         */
+        CLASS
     };
 
-    private static <T, E> T getKeyByValueFromHashMap(Map<T, E> map, E value) {
-        for (Map.Entry<T, E> entryOfIteratorOfObjectsClass : map.entrySet()) {
+    /**
+     * Funkcja zwracająca klucz rekordu w mapie o podanej wartość.
+     *
+     * @param map zmienna zawierająca elemnt typu {@link Map}.
+     * @param value poszukiwana wartość w zmiennej {
+     * @param map}.
+     *
+     * @return {
+     * @param map.K} - klucz wyszukanego rekordu.
+     */
+    private static <K, E> K getKeyByValueFromHashMap(Map<K, E> map, E value) {
+        for (Map.Entry<K, E> entryOfIteratorOfObjectsClass : map.entrySet()) {
             if (value.equals(entryOfIteratorOfObjectsClass.getValue())) {
                 return entryOfIteratorOfObjectsClass.getKey();
             }
@@ -125,20 +197,46 @@ public class FunctionBlock {
     }
 
     /**
-     * Metoda zmienia główny rejest ID LLVM o +1. .
+     * Funkcja zmienia główny rejest ID LLVM o +1.
      *
      * @return <code>int registerId</code>
      */
     public int nextRegister() {
-        return registerId++;
-    }
-
-    public int register() {
-        return registerId;
+        if ((boolean) registerId.get(registerId.size() - 1)[1]) {
+            registerId.get(registerId.size() - 1)[1] = false;
+        } else {
+            registerId.set(registerId.size() - 1, new Object[]{(int) registerId.get(registerId.size() - 1)[0] + 1, registerId.get(registerId.size() - 1)[1]});
+        }
+        return (int) registerId.get(registerId.size() - 1)[0];
     }
 
     /**
-     * Metoda dodaje tekst do
+     * Funkcja zwraca aktualny rejest ID LLVM.
+     *
+     * @return <code>int registerId</code>
+     */
+    public int register() {
+        return (int) registerId.get(registerId.size() - 1)[0];
+    }
+
+    /**
+     * Funkcja dodaje nowy registerId do ArrayList.
+     *
+     */
+    public void newRegister() {
+        registerId.add(new Object[]{1, true});
+    }
+
+    /**
+     * Funkcja usuwa ostatni registerId z ArrayList.
+     *
+     */
+    public void removeLastRegister() {
+        registerId.remove(registerId.size() - 1);
+    }
+
+    /**
+     * Funkcja dodaje tekst do
      * <code>StringBuilder builder</code>, który jest zbiorem poleceń programu
      * głównego LLVM.
      *
@@ -148,9 +246,9 @@ public class FunctionBlock {
      * lub <code>EMITSTART</code> lub <code>EMITEND</code>.
      * @return
      */
-    public String emitDeclareOrDefinition(String str, typesOfEmitDeclareOrDefinition type) {
+    public String emitDeclareOrDefinition(String str, declareOrDefinitonType type) {
         switch (type) {
-            case EMITDEFINITON:
+            case DEFINITION:
                 if (!hashMapDefinition.containsValue(str)) {
                     hashMapDefinition.put(".str" + (hashMapDefinition.size() + 1), str);
                     builderDefinition.append(str).append("\n");
@@ -158,7 +256,7 @@ public class FunctionBlock {
                 } else {
                     return getKeyByValueFromHashMap(hashMapDefinition, str);
                 }
-            case EMITDECLARE:
+            case DECLARE:
                 if (!declaresArrayList.contains(str.substring(str.indexOf("@") + 1, str.indexOf("(")))) {
                     declaresArrayList.add(str.substring(str.indexOf("@") + 1, str.indexOf("(")));
                     builderDeclare.append(str).append("\n");
@@ -169,8 +267,16 @@ public class FunctionBlock {
         }
     }
 
+    public void setFunctionType(String className, String functionName, functionTypes type) {
+        hashMapClasses.get(className).hashMapFunction.get(functionName).functionType = type;
+    }
+
+    public functionTypes checkFunctionType(String className, String functionName) {
+        return hashMapClasses.get(className).hashMapFunction.get(functionName).functionType;
+    }
+
     /**
-     * Metoda dodaje tekst do
+     * Funkcja dodaje tekst do
      * <code>StringBuilder builder</code>, który jest zbiorem poleceń programu
      * głównego LLVM.
      *
@@ -180,23 +286,30 @@ public class FunctionBlock {
         builderTemp.append(str).append("\n");
     }
 
-    public void emitTemp(String str, String valueName, typesOfDeclarationValues typeDeclaration) {
+    public void emitTemp(String str, String valueName, declarationValuesTypes typeDeclaration) {
         objectOfAllocaValue = new ObjectsOfAllocaValue(typeDeclaration);
         nameOfAllocaValue = valueName;
         builderTemp.append(str).append("\n");
     }
 
-    public void emit(String className, String functionName, typesOfEmitClassAndFunction type) {
+    public void emit(String className, String functionName, emitTypes type) {
         switch (type) {
             case FUNCTIONSOFCLASS:
+                //System.out.println(hashMapClasses.get(className).hashMapFunction.get(functionName).objectOfBuildersInFunction.builderMain);
+                hashMapClasses.get(className).hashMapFunction.get(functionName).objectOfBuildersInFunction.builderMain.append(builderTemp);
+                builderTemp = new StringBuilder();
+                break;
+            case FUNCTIONSOFCLASSDEFINE:
                 if (!hashMapClasses.get(className).hashMapFunction.containsKey(functionName)) {
-                    ObjectsOfFunction objectsOfFunction = new ObjectsOfFunction();
-                    objectsOfFunction.objectOfBuildersInFunction.builderMain = builderTemp;
-                    hashMapClasses.get(className).hashMapFunction.put(functionName, objectsOfFunction);
+                    ObjectsOfFunction objectsOfFunctions = new ObjectsOfFunction();
+                    objectsOfFunctions.objectOfBuildersInFunction.builderDefine = builderTemp;
+                    hashMapClasses.get(className).hashMapFunction.put(functionName, objectsOfFunctions);
 
                 } else {
-                    hashMapClasses.get(className).hashMapFunction.get(functionName).objectOfBuildersInFunction.builderMain.append(builderTemp);
+                    //System.out.println(hashMapClasses.get(className).hashMapFunction.get(functionName).objectOfBuildersInFunction.builderMain);
+                    hashMapClasses.get(className).hashMapFunction.get(functionName).objectOfBuildersInFunction.builderDefine = builderTemp;
                 }
+
                 builderTemp = new StringBuilder();
                 break;
             case ADDNEWALLOCA:
@@ -205,7 +318,7 @@ public class FunctionBlock {
                     if (!hashMapFunctionValues.containsKey(nameOfAllocaValue)) {
                         ObjectsOfFunction objectsOfFunction = hashMapClasses.get(className).hashMapFunction.get(functionName);
 
-                        if (objectOfAllocaValue.actualTypeOfDeclarationValue.equals(typesOfDeclarationValues.STRING)) {
+                        if (objectOfAllocaValue.actualTypeOfDeclarationValue.equals(declarationValuesTypes.STRING)) {
                             objectsOfFunction.objectOfBuildersInFunction.builderAllocaString.append(builderTemp);
                         } else {
                             objectsOfFunction.objectOfBuildersInFunction.builderAllocaAnother.append(builderTemp);
@@ -218,7 +331,7 @@ public class FunctionBlock {
 
                             objectsOfFunction.hashMapFunctionValues.get(nameOfAllocaValue).actualTypeOfDeclarationValue = objectOfAllocaValue.actualTypeOfDeclarationValue;
                             objectsOfFunction.hashMapFunctionValues.get(nameOfAllocaValue).allocaTypesOfValue.add(objectOfAllocaValue.actualTypeOfDeclarationValue);
-                            if (objectOfAllocaValue.actualTypeOfDeclarationValue.equals(typesOfDeclarationValues.STRING)) {
+                            if (objectOfAllocaValue.actualTypeOfDeclarationValue.equals(declarationValuesTypes.STRING)) {
                                 objectsOfFunction.objectOfBuildersInFunction.builderAllocaString.append(builderTemp);
                             } else {
                                 objectsOfFunction.objectOfBuildersInFunction.builderAllocaAnother.append(builderTemp);
@@ -242,7 +355,7 @@ public class FunctionBlock {
     }
 
     /**
-     * Metoda dodaje do objektu {@link StringBuilder}
+     * Funkcja dodaje do objektu {@link StringBuilder}
      * <code>builderClasses</code> ciąg znaków str.
      *
      * @param str ciąg znaków który zostanie wpisany do objektu
@@ -253,7 +366,7 @@ public class FunctionBlock {
     }
 
     /**
-     * Metoda sprawdza czy dana zmienna została zalokowana w pamięci.
+     * Funkcja sprawdza czy dana zmienna została zalokowana w pamięci.
      *
      * @param name nazwa zmiennej, którą chcemy sprawdzić.
      * @param type typ sprawdzanej deklaracji (<code>ALLOCA</code> * * * * * *
@@ -271,6 +384,16 @@ public class FunctionBlock {
         }
     }
 
+    /**
+     * Funkcja sprawdza czy dana zmienna została zalokowana w pamięci.
+     *
+     * @param name nazwa zmiennej, którą chcemy sprawdzić.
+     * @param type typ sprawdzanej deklaracji (<code>ALLOCA</code> * * * * * *
+     * lub <code>METHODS</code>).
+     * @return <code>true</code>, jeślie zmienna jest zalokowana w pamięci;<br
+     * />
+     * <code>false</code>, jeśli zmienna nie jest zalokowana w pamięci.
+     */
     public boolean checkDeclaration(String className, String functionName) {
 
         if (hashMapClasses.get(className).hashMapFunction.containsKey(functionName)) {
@@ -280,12 +403,22 @@ public class FunctionBlock {
         }
     }
 
-    public boolean checkDeclaration(String valueName, typesOfDeclarationValues typesOfDeclarationValues, String className, String functionName) {
+    public boolean checkDeclaration(String valueName, declarationValuesTypes declarationValuesType, String className, String functionName) {
 
-        return hashMapClasses.get(className).hashMapFunction.get(functionName).hashMapFunctionValues.get(valueName).allocaTypesOfValue.contains(typesOfDeclarationValues);
+        return hashMapClasses.get(className).hashMapFunction.get(functionName).hashMapFunctionValues.get(valueName).allocaTypesOfValue.contains(declarationValuesType);
     }
 
-    public boolean checkDeclaration(String declareOrDefinitionName, typeDeclareOrDefiniton type) {
+    /**
+     * Funkcja sprawdza czy dana zmienna została zalokowana w pamięci.
+     *
+     * @param name nazwa zmiennej, którą chcemy sprawdzić.
+     * @param type typ sprawdzanej deklaracji (<code>ALLOCA</code> * * * * * *
+     * lub <code>METHODS</code>).
+     * @return <code>true</code>, jeślie zmienna jest zalokowana w pamięci;<br
+     * />
+     * <code>false</code>, jeśli zmienna nie jest zalokowana w pamięci.
+     */
+    public boolean checkDeclaration(String declareOrDefinitionName, declareOrDefinitonType type) {
         switch (type) {
             case DECLARE:
                 if (builderDeclare.indexOf(declareOrDefinitionName) >= 0) {
@@ -308,8 +441,8 @@ public class FunctionBlock {
     }
 
     /**
-     * Metoda sprawdza jakiego typu jest zalokowana w pamięci zmienna.<br />
-     * Metoda ta sprawdza również, czy dana zmienna ma swój odpowiednik double:
+     * Funkcja sprawdza jakiego typu jest zalokowana w pamięci zmienna.<br />
+     * Funkcja ta sprawdza również, czy dana zmienna ma swój odpowiednik double:
      * <code>name.double</code>. Jeśli jest zwraca
      * <code>DOUBLE</code>.
      *
@@ -319,11 +452,11 @@ public class FunctionBlock {
      * <code>DOUBLE</code>, jeślie zmienna jest typu double lub posiada swój
      * odpowiednik <code>name.double</code>.
      */
-    public typesOfDeclarationValues checkActualTypeOfDeclaration(String valueName, String className, String functionName) {
+    public declarationValuesTypes checkActualTypeOfDeclaration(String valueName, String className, String functionName) {
         return hashMapClasses.get(className).hashMapFunction.get(functionName).hashMapFunctionValues.get(valueName).actualTypeOfDeclarationValue;
     }
 
-    public void changeTypeOfDeclarationValues(String valueName, String className, String functionName, typesOfDeclarationValues type) {
+    public void changeTypeOfDeclarationValues(String valueName, String className, String functionName, declarationValuesTypes type) {
         hashMapClasses.get(className).hashMapFunction.get(functionName).hashMapFunctionValues.get(valueName).actualTypeOfDeclarationValue = type;
     }
 
@@ -350,9 +483,9 @@ public class FunctionBlock {
                 StringBuilder builderFunction = new StringBuilder();
                 ObjectOfBuildersInFunction objectOfBuildersInFunction = iteratorOfObjectsOfFunction.next().getValue().objectOfBuildersInFunction;
 
+                builderFunction.append(objectOfBuildersInFunction.builderDefine);
+                builderFunction.append(objectOfBuildersInFunction.builderAllocaString.append(objectOfBuildersInFunction.builderAllocaAnother));
                 builderFunction.append(objectOfBuildersInFunction.builderMain);
-
-                builderFunction.insert(builderFunction.indexOf("{") + 2, (objectOfBuildersInFunction.builderAllocaString.append(objectOfBuildersInFunction.builderAllocaAnother)));
                 arrayListOfFinalStringBuildersOfClass.add(builderFunction);
             }
             arrayListOfArrayListOfFinalStringBuildersOfClass.add(arrayListOfFinalStringBuildersOfClass);

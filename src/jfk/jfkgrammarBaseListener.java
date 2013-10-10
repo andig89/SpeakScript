@@ -98,6 +98,32 @@ public class jfkgrammarBaseListener implements jfkgrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterStatements(@NotNull jfkgrammarParser.StatementsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitStatements(@NotNull jfkgrammarParser.StatementsContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterReturnFunction(@NotNull jfkgrammarParser.ReturnFunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitReturnFunction(@NotNull jfkgrammarParser.ReturnFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterAddExpr(@NotNull jfkgrammarParser.AddExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
